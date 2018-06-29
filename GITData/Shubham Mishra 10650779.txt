@@ -1,0 +1,370 @@
+INSERT:
+db.bank.insert({_AccNo:1000101,
+    Balance:1000000,
+    CustomerDetails:
+    {_id:"A001",
+        Name:"Amit",
+        street:"104/3 lane",
+            city:"New Delhi",
+            loan_amt:10000,
+            dep_amt:25000},
+            Branch:
+            {BranchName:"SBI Shalimar",
+                BranchCity:"New Delhi",
+                Assets:5000000}})
+
+ db.bank.insert({_AccNo:1001867,
+    Balance:2000000,
+    CustomerDetails:
+    {_id:"A0054",
+        Name:"Raju",
+        
+        street:"Main Road Ramapuram",
+            city:"Chennai",
+            loan_amt:23000,
+            dep_amt:58000},
+            Branch:
+            {BranchName:"SBI mannpakkam",
+                BranchCity:"Chennai",
+                Assets:6000000}})
+  
+ db.bank.insert({_AccNo:1001876,
+    Balance:2500000,
+    CustomerDetails:
+    {_id:"A00565",
+        Name:"Sandra",
+        
+        street:"23 Jack Street",
+            city:"Bombay",
+            loan_amt:27000,
+            dep_amt:67000},
+            Branch:
+            {BranchName:"SBI ChinoPark",
+                BranchCity:"Pune",
+                Assets:6000000}}) 
+
+ db.bank.insert({_AccNo:100764,
+    Balance:100000,
+    CustomerDetails:
+    {_id:"A00587",
+        Name:"Hussain",
+        
+        street:"EastHill",
+            city:"New Delhi",
+            loan_amt:29000,
+            dep_amt:62000},
+            Branch:
+            {BranchName:"SBI KamlaNagar",
+                BranchCity:"Delhi",
+                Assets:8000000}}) 
+
+db.bank.insert({_AccNo:10018665,
+    Balance:350000,
+    CustomerDetails:
+    {_id:"A0009",
+        Name:"Prakash",
+        
+        street:"Saket",
+            city:"New Delhi",
+            loan_amt:2400,
+            dep_amt:50000},
+            Branch:
+            {BranchName:"SBI KamlaNagar",
+                BranchCity:"Delhi",
+                Assets:300000}})
+
+QUERIES:
+
+1)•***Choose appropriate primary key(s)****
+
+
+
+2)****************************•	Create index on primary key(s)***********
+db.bank.ensureIndex({_AccNo:1})  
+/* 1 */
+{
+    "createdCollectionAutomatically" : false,
+    "numIndexesBefore" : 1,
+    "numIndexesAfter" : 2,
+    "ok" : 1.0
+}
+db.bank.ensureIndex({_id:1}) 
+/* 1 */
+{
+    "createdCollectionAutomatically" : false,
+    "numIndexesBefore" : 2,
+    "numIndexesAfter" : 2,
+    "note" : "all indexes already exist",
+    "ok" : 1.0
+}
+
+
+3)************************•	The names and cities of all borrowers. *********************************
+db.bank.find({},{"CustomerDetails.Name":"","CustomerDetails.city":""})
+* 1 */
+{
+    "_id" : ObjectId("5b2ce6d5210d67c660f4e407"),
+    "CustomerDetails" : {
+        "Name" : "Amit",
+        "city" : "New Delhi"
+    }
+}
+
+/* 2 */
+{
+    "_id" : ObjectId("5b2ce6f0210d67c660f4e408"),
+    "CustomerDetails" : {
+        "Name" : "Raju",
+        "city" : "Chennai"
+    }
+}
+
+/* 3 */
+{
+    "_id" : ObjectId("5b2ce712210d67c660f4e409"),
+    "CustomerDetails" : {
+        "Name" : "Sandra",
+        "city" : "Bombay"
+    }
+}
+
+/* 4 */
+{
+    "_id" : ObjectId("5b2ce728210d67c660f4e40a"),
+    "CustomerDetails" : {
+        "Name" : "Hussain",
+        "city" : "New Delhi"
+    }
+}
+
+
+
+
+
+
+
+4)**********************•	The names of borrowers who live in Chennai******************
+db.bank.find({$and:[{dep_amt:{$gt:0}},{"CustomerDetails.city":"Chennai"}]})
+/* 1 */
+{
+    "_id" : ObjectId("5b2ce6f0210d67c660f4e408"),
+    "_AccNo" : 1001867.0,
+    "Balance" : 2000000.0,
+    "CustomerDetails" : {
+        "_id" : "A0054",
+        "Name" : "Raju",
+        "street" : "Main Road Ramapuram",
+        "city" : "Chennai",
+        "loan_amt" : 23000.0,
+        "dep_amt" : 58000.0
+    },
+    "Branch" : {
+        "BranchName" : "SBI mannpakkam",
+        "BranchCity" : "Chennai",
+        "Assets" : 6000000.0
+    }
+}
+
+
+
+
+
+
+
+5) ********************•	Find the name, city, and assets of the branch with the largest assets*******************
+db.bank.aggregate([{$group:{_id:1, max:{ $max:"$Branch.Assets"}}}])
+/* 1 */
+{
+    "_id" : 1.0,
+    "max" : 8000000.0
+}
+
+
+
+
+
+
+
+
+
+6)****************•	The names and cities of customers who have a loan at Pune branch. *************
+db.bank.find({"CustomerDetails.loan_amt":{$gt:0},
+"Branch.BranchCity":"Pune"},
+{"CustomerDetails.Name":1,
+"CustomerDetails.city":1})
+/* 1 */
+{
+    "_id" : ObjectId("5b2ce712210d67c660f4e409"),
+    "CustomerDetails" : {
+        "Name" : "Sandra",
+        "city" : "Bombay"
+    }
+}
+
+
+
+7)**************•	Find the number of accounts with balances between 700 and 900. ************
+db.bank.aggregate([{$match:{Balance: {$gte:2000000,$lte:4000000 }}},{ $count:"Number of balance between 2000000 and 4000000"}])
+/* 1 */
+{
+    "Number of balance between 2000000 and 4000000" : 2
+}
+
+
+
+
+
+
+8) ********************•	The names of customers with both accounts and loans at Pune branch. *************
+ db.bank.find({"CustomerDetails.loan_amt":{$gt:0},"Branch.BranchCity":"Pune"})
+/* 1 */
+{
+    "_id" : ObjectId("5b2ce712210d67c660f4e409"),
+    "_AccNo" : 1001876.0,
+    "Balance" : 2500000.0,
+    "CustomerDetails" : {
+        "_id" : "A00565",
+        "Name" : "Sandra",
+        "street" : "23 Jack Street",
+        "city" : "Bombay",
+        "loan_amt" : 27000.0,
+        "dep_amt" : 67000.0
+    },
+    "Branch" : {
+        "BranchName" : "SBI ChinoPark",
+        "BranchCity" : "Pune",
+        "Assets" : 6000000.0
+    }
+}
+
+
+
+
+9)*******•	The customers whose total loans are greater than the total amount in their bank accounts******
+ db.bank.find({$expr:{$gt:["$CustomerDetails.loan_amt","$Balance"]}},{"CustomerDetails.Name":1})
+Fetched 0 record(s) in 1ms
+
+
+
+
+
+
+
+
+
+
+
+
+10) ***************•	The names of customers living on streets with names ending in "Hill". ************ 
+db.bank.find({"CustomerDetails.street": /Hill$/},{_id: 1,"CustomerDetails.Name":1})
+/* 1 */
+{
+    "_id" : ObjectId("5b2ce728210d67c660f4e40a"),
+    "CustomerDetails" : {
+        "Name" : "Hussain"
+    }
+}
+
+
+
+
+
+
+
+11)**************The names of customers with an account but not a loan at Pune branch. *****
+db.bank.find({$and:[{"Branch.BranchCity":"Pune"},{"CustomerDetails.loan_amt":{$gt:1}}]},{"CustomerDetails.Name":1})
+/* 1 */
+{
+    "_id" : ObjectId("5b2ce712210d67c660f4e409"),
+    "CustomerDetails" : {
+        "Name" : "Sandra"
+    }
+}
+
+
+
+
+12)********•	 The names of branches whose assets are greater than the assets of all branches in    Hyderabad. ******
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+13)******************The branch with the largest average balance. ************
+ db.bank.aggregate([{$group : {_id : "$Branch.BranchName", Avg:{$avg : "$Balance" }}},{$sort :{Avg : -1 }},{$limit :1}])
+/* 1 */
+{
+    "_id" : "SBI ChinoPark",
+    "Avg" : 2500000.0
+} 
+
+
+
+
+
+
+
+14)**********************The branch name and number of customers for each branch************
+db.bank.aggregate([{ $group:{_id:"$Branch.BranchName","number of customers at each branch":{$sum:1}}}])
+/* 1 */
+{
+    "_id" : "SBI KamlaNagar",
+    "number of customers at each branch" : 2.0
+}
+
+/* 2 */
+{
+    "_id" : "SBI mannpakkam",
+    "number of customers at each branch" : 1.0
+}
+
+/* 3 */
+{
+    "_id" : "SBI ChinoPark",
+    "number of customers at each branch" : 1.0
+}
+
+/* 4 */
+{
+    "_id" : "SBI Shalimar",
+    "number of customers at each branch" : 1.0
+}
+
+
+
+
+
+
+
+15)*************•	 Deposit an additional Rs. 20,000 to Raju’s bank account. **************
+db.bank.update({ "CustomerDetails.Name": "Raju" },{$inc:{"CustomerDetails.dep_amt": 20000,} })
+/* 2 */
+{
+    "_id" : ObjectId("5b2ce6f0210d67c660f4e408"),
+    "_AccNo" : 1001867.0,
+    "Balance" : 2000000.0,
+    "CustomerDetails" : {
+        "_id" : "A0054",
+        "Name" : "Raju",
+        "street" : "Main Road Ramapuram",
+        "city" : "Chennai",
+        "loan_amt" : 23000.0,
+        "dep_amt" : 78000.0
+    },
+    "Branch" : {
+        "BranchName" : "SBI mannpakkam",
+        "BranchCity" : "Chennai",
+        "Assets" : 6000000.0
+    }
+}
+
+
